@@ -12,12 +12,14 @@
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 16px;
     color: #fff;
+    gap: 20px;
   }
-  .container {
+  .container, .calc-container {
     background: rgba(255,255,255,0.07);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,0.12);
@@ -172,7 +174,6 @@
     color: rgba(255,255,255,0.3);
   }
 
-  /* remove number input spinners */
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -180,18 +181,190 @@
   }
   input[type=number] { -moz-appearance: textfield; }
 
+  /* ===== Calculator Styles ===== */
+  .calc-title {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .calc-display {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    text-align: right;
+    min-height: 88px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+  .calc-expression {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.4);
+    min-height: 1.2em;
+    word-break: break-all;
+    margin-bottom: 4px;
+  }
+  .calc-result {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fbc2eb;
+    word-break: break-all;
+    line-height: 1.2;
+    transition: font-size 0.2s;
+  }
+  .calc-result.small {
+    font-size: 1.5rem;
+  }
+
+  .calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .calc-btn {
+    padding: 16px 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .calc-btn:hover {
+    background: rgba(255,255,255,0.12);
+  }
+  .calc-btn:active {
+    transform: scale(0.94);
+    background: rgba(255,255,255,0.18);
+  }
+
+  .calc-btn.op {
+    background: rgba(161,140,209,0.2);
+    color: #d4b8f0;
+    border-color: rgba(161,140,209,0.25);
+  }
+  .calc-btn.op:hover {
+    background: rgba(161,140,209,0.35);
+  }
+
+  .calc-btn.func {
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.6);
+    font-size: 1rem;
+  }
+  .calc-btn.func:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+
+  .calc-btn.equal {
+    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+    color: #1a1a2e;
+    font-weight: 700;
+    border: none;
+  }
+  .calc-btn.equal:hover {
+    opacity: 0.85;
+  }
+
+  .calc-btn.zero {
+    grid-column: span 2;
+  }
+
+  .calc-history {
+    margin-top: 12px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .calc-history.open {
+    max-height: 300px;
+  }
+  .calc-history-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 8px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.45);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .calc-history-toggle:hover {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+  }
+  .calc-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 0 4px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .calc-history-item {
+    text-align: right;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .calc-history-item:hover {
+    background: rgba(255,255,255,0.08);
+  }
+  .calc-history-expr {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.35);
+  }
+  .calc-history-val {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d4b8f0;
+  }
+  .calc-history-empty {
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.25);
+    padding: 16px 0;
+  }
+
   @media (max-width: 380px) {
-    .container { padding: 24px 16px; }
+    .container, .calc-container { padding: 24px 16px; }
     .currency-row { gap: 10px; padding: 12px; }
     .currency-detail { min-width: 60px; }
     .currency-code { font-size: 0.95rem; }
     .currency-input { font-size: 1.1rem; padding: 8px 10px; }
     .flag { font-size: 1.6rem; }
+    .calc-btn { padding: 14px 6px; font-size: 1.1rem; }
+    .calc-result { font-size: 1.8rem; }
   }
 </style>
 </head>
 <body>
 
+<!-- ===== 匯率換算 ===== -->
 <div class="container">
   <h1>💱 匯率快速換算</h1>
   <p class="subtitle">輸入任一幣種，其餘自動換算</p>
@@ -215,7 +388,53 @@
   <p class="hint">匯率來源：ExchangeRate API（若無法連線則使用預設值）</p>
 </div>
 
+<!-- ===== 計算機 ===== -->
+<div class="calc-container">
+  <div class="calc-title">🧮 計算機</div>
+
+  <div class="calc-display">
+    <div class="calc-expression" id="calcExpr"></div>
+    <div class="calc-result" id="calcResult">0</div>
+  </div>
+
+  <div class="calc-grid">
+    <button class="calc-btn func" onclick="calcClear()">AC</button>
+    <button class="calc-btn func" onclick="calcToggleSign()">+/−</button>
+    <button class="calc-btn func" onclick="calcPercent()">%</button>
+    <button class="calc-btn op" onclick="calcOp('÷')">÷</button>
+
+    <button class="calc-btn" onclick="calcDigit('7')">7</button>
+    <button class="calc-btn" onclick="calcDigit('8')">8</button>
+    <button class="calc-btn" onclick="calcDigit('9')">9</button>
+    <button class="calc-btn op" onclick="calcOp('×')">×</button>
+
+    <button class="calc-btn" onclick="calcDigit('4')">4</button>
+    <button class="calc-btn" onclick="calcDigit('5')">5</button>
+    <button class="calc-btn" onclick="calcDigit('6')">6</button>
+    <button class="calc-btn op" onclick="calcOp('−')">−</button>
+
+    <button class="calc-btn" onclick="calcDigit('1')">1</button>
+    <button class="calc-btn" onclick="calcDigit('2')">2</button>
+    <button class="calc-btn" onclick="calcDigit('3')">3</button>
+    <button class="calc-btn op" onclick="calcOp('+')">+</button>
+
+    <button class="calc-btn zero" onclick="calcDigit('0')">0</button>
+    <button class="calc-btn" onclick="calcDot()">.</button>
+    <button class="calc-btn equal" onclick="calcEqual()">=</button>
+  </div>
+
+  <button class="calc-history-toggle" id="histToggle" onclick="toggleHistory()">
+    <span id="histToggleText">📋 顯示歷史紀錄</span>
+  </button>
+  <div class="calc-history" id="calcHistory">
+    <div class="calc-history-list" id="histList">
+      <div class="calc-history-empty">尚無計算紀錄</div>
+    </div>
+  </div>
+</div>
+
 <script>
+// ===== 匯率換算邏輯 =====
 const currencyList = [
   { code: 'HKD', flag: '🇭🇰', name: '港幣' },
   { code: 'TWD', flag: '🇹🇼', name: '台幣' },
@@ -268,9 +487,7 @@ function onFocus(e) {
   document.getElementById(`row-${code}`).classList.add('active');
 }
 
-function onBlur() {
-  // keep active style until another is focused
-}
+function onBlur() {}
 
 function onInput(e) {
   const fromCode = e.target.dataset.code;
@@ -337,7 +554,6 @@ async function fetchRates() {
     refreshText.textContent = '重新整理匯率';
   }, 600);
 
-  // Re-trigger conversion for active input
   if (activeCode) {
     const inp = document.getElementById(`input-${activeCode}`);
     inp.dispatchEvent(new Event('input'));
@@ -359,6 +575,219 @@ function updateStatus() {
 
 buildRows();
 fetchRates();
+
+
+// ===== 計算機邏輯 =====
+let calcCurrent = '0';
+let calcPrevious = '';
+let calcOperator = '';
+let calcNewInput = true;
+let calcJustEval = false;
+let calcHistoryArr = [];
+
+const calcResultEl = document.getElementById('calcResult');
+const calcExprEl = document.getElementById('calcExpr');
+
+function updateCalcDisplay() {
+  calcResultEl.textContent = calcCurrent;
+  calcResultEl.classList.toggle('small', calcCurrent.length > 12);
+}
+
+function calcDigit(d) {
+  if (calcJustEval) {
+    calcClear();
+    calcJustEval = false;
+  }
+  if (calcNewInput) {
+    calcCurrent = d;
+    calcNewInput = false;
+  } else {
+    if (calcCurrent.length >= 15) return;
+    if (calcCurrent === '0' && d === '0') return;
+    if (calcCurrent === '0') {
+      calcCurrent = d;
+    } else {
+      calcCurrent += d;
+    }
+  }
+  updateCalcDisplay();
+}
+
+function calcDot() {
+  if (calcJustEval) {
+    calcClear();
+    calcJustEval = false;
+  }
+  if (calcNewInput) {
+    calcCurrent = '0.';
+    calcNewInput = false;
+  } else if (!calcCurrent.includes('.')) {
+    calcCurrent += '.';
+  }
+  updateCalcDisplay();
+}
+
+function calcOp(op) {
+  calcJustEval = false;
+  if (calcOperator && !calcNewInput) {
+    calcEvaluate();
+  }
+  calcPrevious = calcCurrent;
+  calcOperator = op;
+  calcNewInput = true;
+  calcExprEl.textContent = `${formatDisplay(calcPrevious)} ${calcOperator}`;
+}
+
+function calcEqual() {
+  if (!calcOperator) return;
+  calcEvaluate();
+  calcOperator = '';
+  calcNewInput = true;
+  calcJustEval = true;
+}
+
+function calcEvaluate() {
+  const a = parseFloat(calcPrevious);
+  const b = parseFloat(calcCurrent);
+  let result = 0;
+  const exprStr = `${formatDisplay(calcPrevious)} ${calcOperator} ${formatDisplay(calcCurrent)}`;
+
+  switch (calcOperator) {
+    case '+': result = a + b; break;
+    case '−': result = a - b; break;
+    case '×': result = a * b; break;
+    case '÷':
+      if (b === 0) {
+        calcCurrent = '錯誤';
+        calcExprEl.textContent = `${exprStr} =`;
+        updateCalcDisplay();
+        return;
+      }
+      result = a / b;
+      break;
+    default: return;
+  }
+
+  const resultStr = formatCalcResult(result);
+  calcExprEl.textContent = `${exprStr} =`;
+  calcCurrent = resultStr;
+  calcPrevious = resultStr;
+  updateCalcDisplay();
+
+  // Add to history
+  calcHistoryArr.unshift({ expr: exprStr, value: resultStr });
+  if (calcHistoryArr.length > 20) calcHistoryArr.pop();
+  renderHistory();
+}
+
+function formatCalcResult(num) {
+  if (Number.isInteger(num) && Math.abs(num) < 1e15) {
+    return num.toString();
+  }
+  const str = parseFloat(num.toPrecision(10)).toString();
+  if (str.length > 15) {
+    return num.toExponential(6);
+  }
+  return str;
+}
+
+function formatDisplay(val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return val;
+  if (Number.isInteger(n) && Math.abs(n) < 1e15) {
+    return n.toLocaleString('en-US');
+  }
+  return val;
+}
+
+function calcClear() {
+  calcCurrent = '0';
+  calcPrevious = '';
+  calcOperator = '';
+  calcNewInput = true;
+  calcJustEval = false;
+  calcExprEl.textContent = '';
+  updateCalcDisplay();
+}
+
+function calcToggleSign() {
+  if (calcCurrent === '0' || calcCurrent === '錯誤') return;
+  if (calcCurrent.startsWith('-')) {
+    calcCurrent = calcCurrent.slice(1);
+  } else {
+    calcCurrent = '-' + calcCurrent;
+  }
+  updateCalcDisplay();
+}
+
+function calcPercent() {
+  const n = parseFloat(calcCurrent);
+  if (isNaN(n)) return;
+  calcCurrent = formatCalcResult(n / 100);
+  updateCalcDisplay();
+}
+
+function toggleHistory() {
+  const panel = document.getElementById('calcHistory');
+  const text = document.getElementById('histToggleText');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    text.textContent = '📋 隱藏歷史紀錄';
+  } else {
+    text.textContent = '📋 顯示歷史紀錄';
+  }
+}
+
+function renderHistory() {
+  const list = document.getElementById('histList');
+  if (calcHistoryArr.length === 0) {
+    list.innerHTML = '<div class="calc-history-empty">尚無計算紀錄</div>';
+    return;
+  }
+  list.innerHTML = calcHistoryArr.map((h, i) => `
+    <div class="calc-history-item" onclick="useHistoryValue(${i})">
+      <div class="calc-history-expr">${h.expr}</div>
+      <div class="calc-history-val">= ${h.value}</div>
+    </div>
+  `).join('');
+}
+
+function useHistoryValue(index) {
+  const val = calcHistoryArr[index].value;
+  calcCurrent = val;
+  calcPrevious = '';
+  calcOperator = '';
+  calcNewInput = true;
+  calcJustEval = false;
+  calcExprEl.textContent = '';
+  updateCalcDisplay();
+}
+
+// 鍵盤支援
+document.addEventListener('keydown', function(e) {
+  // 只有當焦點不在匯率輸入框時才觸發
+  if (document.activeElement && document.activeElement.classList.contains('currency-input')) return;
+
+  const key = e.key;
+  if (key >= '0' && key <= '9') { calcDigit(key); e.preventDefault(); }
+  else if (key === '.') { calcDot(); e.preventDefault(); }
+  else if (key === '+') { calcOp('+'); e.preventDefault(); }
+  else if (key === '-') { calcOp('−'); e.preventDefault(); }
+  else if (key === '*') { calcOp('×'); e.preventDefault(); }
+  else if (key === '/') { calcOp('÷'); e.preventDefault(); }
+  else if (key === 'Enter' || key === '=') { calcEqual(); e.preventDefault(); }
+  else if (key === 'Escape' || key === 'c' || key === 'C') { calcClear(); e.preventDefault(); }
+  else if (key === '%') { calcPercent(); e.preventDefault(); }
+  else if (key === 'Backspace') {
+    if (calcCurrent.length > 1) {
+      calcCurrent = calcCurrent.slice(0, -1);
+    } else {
+      calcCurrent = '0';
+    }
+    updateCalcDisplay();
+    e.preventDefault();
+  }
+});
 </script>
 </body>
 </html>
