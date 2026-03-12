@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>港幣 / 台幣 / 馬幣 / 星幣 匯率換算</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    color: #fff;
+  }
+  .container {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 24px;
+  }
+  .status {
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+  .status.live { background: rgba(46,204,113,0.15); color: #2ecc71; }
+  .status.offline { background: rgba(231,76,60,0.15); color: #e74c3c; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+  }
+  .status.live .status-dot { background: #2ecc71; }
+  .status.offline .status-dot { background: #e74c3c; animation: none; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .currency-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .currency-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.3s;
+  }
+  .currency-row.active {
+    border-color: rgba(247,151,30,0.5);
+    background: rgba(247,151,30,0.08);
+    box-shadow: 0 0 20px rgba(247,151,30,0.08);
+  }
+
+  .flag {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .currency-detail {
+    display: flex;
+    flex-direction: column;
+    min-width: 72px;
+    flex-shrink: 0;
+  }
+  .currency-code {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+  }
+  .currency-name {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .currency-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    color: #ffd200;
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-family: inherit;
+    outline: none;
+    text-align: right;
+    transition: border-color 0.3s, background 0.3s;
+    min-width: 0;
+  }
+  .currency-input:focus {
+    border-color: rgba(247,151,30,0.6);
+    background: rgba(255,255,255,0.1);
+  }
+  .currency-input::placeholder {
+    color: rgba(255,255,255,0.2);
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+
+  .refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 12px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .refresh-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+  .refresh-btn svg {
+    transition: transform 0.6s;
+  }
+  .refresh-btn.spinning svg {
+    transform: rotate(360deg);
+  }
+
+  .hint {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* remove number input spinners */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] { -moz-appearance: textfield; }
+
+  @media (max-width: 380px) {
+    .container { padding: 24px 16px; }
+    .currency-row { gap: 10px; padding: 12px; }
+    .currency-detail { min-width: 60px; }
+    .currency-code { font-size: 0.95rem; }
+    .currency-input { font-size: 1.1rem; padding: 8px 10px; }
+    .flag { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>💱 匯率快速換算</h1>
+  <p class="subtitle">輸入任一幣種，其餘自動換算</p>
+
+  <div id="statusBar" class="status offline">
+    <span class="status-dot"></span>
+    <span id="statusText">正在載入匯率...</span>
+  </div>
+
+  <div class="currency-rows" id="rows"></div>
+
+  <button class="refresh-btn" id="refreshBtn" onclick="fetchRates()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <polyline points="1 20 1 14 7 14"></polyline>
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+    </svg>
+    <span id="refreshText">重新整理匯率</span>
+  </button>
+
+  <p class="hint">匯率來源：ExchangeRate API（若無法連線則使用預設值）</p>
+</div>
+
+<script>
+const currencyList = [
+  { code: 'HKD', flag: '🇭🇰', name: '港幣' },
+  { code: 'TWD', flag: '🇹🇼', name: '台幣' },
+  { code: 'MYR', flag: '🇲🇾', name: '馬幣' },
+  { code: 'SGD', flag: '🇸🇬', name: '星幣' },
+];
+
+let ratesFromUSD = { HKD: 7.80, TWD: 32.40, MYR: 4.47, SGD: 1.34 };
+let isLive = false;
+let lastUpdate = null;
+let activeCode = null;
+
+function buildRows() {
+  const container = document.getElementById('rows');
+  container.innerHTML = '';
+  currencyList.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'currency-row';
+    row.id = `row-${c.code}`;
+    row.innerHTML = `
+      <span class="flag">${c.flag}</span>
+      <div class="currency-detail">
+        <span class="currency-code">${c.code}</span>
+        <span class="currency-name">${c.name}</span>
+      </div>
+      <input
+        type="number"
+        class="currency-input"
+        id="input-${c.code}"
+        data-code="${c.code}"
+        placeholder="輸入金額"
+        min="0"
+        step="any"
+      >
+    `;
+    container.appendChild(row);
+  });
+
+  document.querySelectorAll('.currency-input').forEach(input => {
+    input.addEventListener('input', onInput);
+    input.addEventListener('focus', onFocus);
+    input.addEventListener('blur', onBlur);
+  });
+}
+
+function onFocus(e) {
+  const code = e.target.dataset.code;
+  activeCode = code;
+  document.querySelectorAll('.currency-row').forEach(r => r.classList.remove('active'));
+  document.getElementById(`row-${code}`).classList.add('active');
+}
+
+function onBlur() {
+  // keep active style until another is focused
+}
+
+function onInput(e) {
+  const fromCode = e.target.dataset.code;
+  const rawVal = e.target.value;
+  const amount = parseFloat(rawVal);
+
+  activeCode = fromCode;
+  document.querySelectorAll('.currency-row').forEach(r => r.classList.remove('active'));
+  document.getElementById(`row-${fromCode}`).classList.add('active');
+
+  if (rawVal === '' || isNaN(amount)) {
+    currencyList.forEach(c => {
+      if (c.code !== fromCode) {
+        document.getElementById(`input-${c.code}`).value = '';
+      }
+    });
+    return;
+  }
+
+  currencyList.forEach(c => {
+    if (c.code === fromCode) return;
+    const rate = getRate(fromCode, c.code);
+    const converted = amount * rate;
+    document.getElementById(`input-${c.code}`).value = formatNum(converted);
+  });
+}
+
+function getRate(from, to) {
+  if (from === to) return 1;
+  return ratesFromUSD[to] / ratesFromUSD[from];
+}
+
+function formatNum(num) {
+  if (num === 0) return '0';
+  if (Math.abs(num) >= 100) return num.toFixed(2);
+  if (Math.abs(num) >= 1) return num.toFixed(4);
+  return num.toFixed(6);
+}
+
+async function fetchRates() {
+  const btn = document.getElementById('refreshBtn');
+  const refreshText = document.getElementById('refreshText');
+  btn.classList.add('spinning');
+  refreshText.textContent = '載入中...';
+
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    ratesFromUSD.HKD = data.rates.HKD;
+    ratesFromUSD.TWD = data.rates.TWD;
+    ratesFromUSD.MYR = data.rates.MYR;
+    ratesFromUSD.SGD = data.rates.SGD;
+    isLive = true;
+    lastUpdate = new Date();
+  } catch (e) {
+    console.warn('無法取得即時匯率，使用預設匯率', e);
+    isLive = false;
+  }
+
+  updateStatus();
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    refreshText.textContent = '重新整理匯率';
+  }, 600);
+
+  // Re-trigger conversion for active input
+  if (activeCode) {
+    const inp = document.getElementById(`input-${activeCode}`);
+    inp.dispatchEvent(new Event('input'));
+  }
+}
+
+function updateStatus() {
+  const bar = document.getElementById('statusBar');
+  const text = document.getElementById('statusText');
+  if (isLive) {
+    bar.className = 'status live';
+    const t = lastUpdate.toLocaleTimeString('zh-Hant');
+    text.textContent = `即時匯率 · 更新於 ${t}`;
+  } else {
+    bar.className = 'status offline';
+    text.textContent = '使用預設匯率（無法連線 API）';
+  }
+}
+
+buildRows();
+fetchRates();
+</script>
+</body>
+</html>
